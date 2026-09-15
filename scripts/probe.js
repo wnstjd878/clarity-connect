@@ -33,7 +33,7 @@ const HYDRATION = /Minified React error #(418|419|421|422|423|425)|Hydration|hyd
     if (!됐나) 실패 += 1;
   };
 
-  async function 열기(page경로) {
+  async function 열기(page경로, identify기다림 = false) {
     const ctx = await browser.newContext({ viewport: cfg.viewport || { width: 390, height: 844 } });
     await ctx.addInitScript(() => Object.defineProperty(navigator, "webdriver", { get: () => undefined }));
     const 클라리티 = [];
@@ -54,6 +54,14 @@ const HYDRATION = /Minified React error #(418|419|421|422|423|425)|Hydration|hyd
     page.on("pageerror", (e) => 오류.push(String(e.message || e)));
     const res = await page.goto(BASE + page경로, { waitUntil: "networkidle" }).catch((e) => ({ status: () => 0, e }));
     await page.waitForTimeout(cfg.wait_ms || 1500);
+    // identify 는 화면이 다 뜬 뒤(하이드레이션 뒤)에 붙는다. 컴퓨터가 바쁘면 고정 대기로는 모자라
+    // 헛실패가 났다(부하 60 에서 1.8초로 부족). 붙을 때까지 기다리되 한도를 둔다.
+    if (identify기다림) {
+      await page.waitForFunction(
+        () => window.clarity && window.clarity.q && Array.from(window.clarity.q).some((a) => a[0] === "identify"),
+        null, { timeout: cfg.identify_timeout_ms || 10000 },
+      ).catch(() => {});
+    }
     const 상태 = await page.evaluate(() => ({
       켜짐: typeof window.clarity === "function",
       쌓임: window.clarity && window.clarity.q ? Array.from(window.clarity.q).map((a) => Array.from(a).map(String).join("|")) : [],
@@ -72,11 +80,12 @@ const HYDRATION = /Minified React error #(418|419|421|422|423|425)|Hydration|hyd
   }
 
   for (const 경로 of cfg.on || []) {
-    const r = await 열기(경로);
-    확인(`켜짐 ${경로}`, r.상태.켜짐 && r.클라리티.length > 0, `응답 ${r.응답}, 클라리티 요청 ${r.클라리티.length}`);
     // expect_identify: true(켜는 화면 전부) / false(안 봄) / ["/"](그 화면만). 방문 기록이 없는 화면(방침 등)은 빼야 한다
     const idPages = cfg.expect_identify;
-    if (idPages === true || idPages === undefined || (Array.isArray(idPages) && idPages.includes(경로))) {
+    const idHere = idPages === true || idPages === undefined || (Array.isArray(idPages) && idPages.includes(경로));
+    const r = await 열기(경로, idHere);
+    확인(`켜짐 ${경로}`, r.상태.켜짐 && r.클라리티.length > 0, `응답 ${r.응답}, 클라리티 요청 ${r.클라리티.length}`);
+    if (idHere) {
       확인(`identify ${경로}`, r.상태.쌓임.some((s) => s.startsWith("identify|")), r.상태.쌓임.slice(0, 6).join(" / ") || "쌓인 것 없음");
     }
     const 끼우기 = r.오류.filter((t) => HYDRATION.test(t));
