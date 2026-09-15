@@ -1,0 +1,12 @@
+{
+  "base": "http://127.0.0.1:3400",
+  "on": ["/", "/privacy"],
+  "off": ["/admin", "/share/00000000-0000-4000-8000-000000000001"],
+  "expect_identify": ["/"],
+  "mask": [
+    { "page": "/", "selector": "body", "expect": "가림" },
+    { "page": "/", "selector": "main h1", "expect": "풀림" }
+  ],
+  "block_writes": true,
+  "wait_ms": 1800
+}

@@ -1,0 +1,5 @@
+clarity-connect-out/
+*.tok
+*.png
+__pycache__/
+node_modules/
