@@ -39,6 +39,8 @@ git clone https://github.com/wnstjd878/clarity-connect .claude/skills/clarity-co
 | `templates/next-app/` | 2단계. Next.js App Router 용 설치 코드·꼬리표·대조 틀 |
 | `scripts/probe.js` | 3단계. 빌드본을 브라우저로 열어 확인. 설정 예 `probe.example.json` (Node + playwright) |
 | `docs/report-and-fix.md` | 5단계(선택). 매일 행동 보고와 「고치기」 자동 수정 설계 (Vercel 예약 실행 + GitHub Actions) |
+| `scripts/clarity_recordings.py` | 5단계 지시 C 참고 구현. 녹화 목록 받아오기·사건 한 줄 요약·방문 기록과 짝짓기 (표준 라이브러리) |
+| `UPGRADE.md` | 판마다 바뀐 것. 이미 붙인 사이트는 여기서 자기 판 이후만 반영 |
 
 ## 사람이 해야 하는 것
 
